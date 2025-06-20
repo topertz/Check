@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice Management System</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-control:invalid {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+
+        .btn {
+            margin-top: 10px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper input {
+            padding-right: 2.5rem; /* Adjust to ensure space for the unit symbol */
+        }
+
+        .unit-symbol {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            padding: 0.5rem 0.75rem;
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 0 0.25rem 0.25rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #495057;
+            pointer-events: none; /* Ensure clicks go through to the input field */
+        }
+
+        .invoice-item {
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f8f9fa;
+        }
+
+        select:invalid {
+            background-color: #f8d7da;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- Seller Form -->
+        <div class="mt-4">
+            <h3 id="sellerText">Add Seller</h3>
+            <form id="sellerForm">
+                <div class="form-group">
+                    <label for="sellerName">Seller Name</label>
+                    <input type="text" class="form-control" id="sellerName" placeholder="Enter seller name" required>
+                </div>
+                <div class="form-group">
+                    <label for="sellerTaxNumber">Tax Number</label>
+                    <input type="text" class="form-control" id="sellerTaxNumber" placeholder="Enter seller tax number" required>
+                </div>
+                <div class="form-group">
+                    <label for="sellerTitle">Seller Title</label>
+                    <input type="text" class="form-control" id="sellerTitle" placeholder="Enter seller title" required>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="addSeller();">Add Seller</button>
+            </form>
+        </div>
+
+        <!-- Customer Form -->
+        <div class="mt-4">
+            <h3 style="display: none;" id="customerText">Add Customer</h3>
+            <form id="customerForm" style="display: none;">
+                <div class="form-group">
+                    <label for="customerName">Customer Name</label>
+                    <input type="text" class="form-control" id="customerName" placeholder="Enter customer name" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerTaxNumber">Tax Number</label>
+                    <input type="text" class="form-control" id="customerTaxNumber" placeholder="Enter customer tax number" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerTitle">Customer Title</label>
+                    <input type="text" class="form-control" id="customerTitle" placeholder="Enter customer title" required>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="addCustomer();">Add Customer</button>
+            </form>
+        </div>
+
+        <!-- Product Form -->
+        <div class="mt-4">
+            <h3 style="display: none;" id="productText">Add Product/Service</h3>
+            <form id="productForm" style="display: none;">
+                <div class="form-group">
+                    <label for="productName">Product/Service Name</label>
+                    <input type="text" class="form-control" id="productName" placeholder="Enter product or service name" required>
+                </div>
+                <div class="form-group">
+                    <label for="nettPrice">Net Price</label>
+                    <div class="input-wrapper">
+                        <input type="number" class="form-control" id="nettPrice" placeholder="Enter net price" required>
+                        <span class="unit-symbol">€</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="vatKey">VAT Key</label>
+                    <div class="input-wrapper">
+                        <input type="number" min="0" max="100" class="form-control" id="vatKey" placeholder="Enter VAT percentage" required>
+                        <span class="unit-symbol">%</span>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="addProduct();">Add Product/Service</button>
+            </form>
+        </div>
+
+        <!-- Create Invoice -->
+        <div class="mt-4">
+            <h3 style="display: none;" id="invoiceText">Create Invoice</h3>
+            <form id="invoiceForm" style="display: none;">
+                <div class="form-group">
+                    <label for="invoiceSeller">Select Seller</label>
+                    <select class="form-control" id="invoiceSeller" style="background-color: #f8d7da; ">
+                        <!-- Seller options will be loaded dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="invoiceCustomer">Select Customer</label>
+                    <select class="form-control" id="invoiceCustomer" style="background-color: #f8d7da; ">
+                        <!-- Customer options will be loaded dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="invoiceDate">Invoice Date</label>
+                    <input type="date" class="form-control" id="invoiceDate" required>
+                </div>
+
+                <!-- Product/Service Items -->
+                <div id="productItemsContainer" class="mb-3">
+                    <h4>Add Products/Services to Invoice</h4>
+                    <div class="form-group">
+                        <label for="invoiceProduct">Select Product/Service</label>
+                        <select class="form-control" id="invoiceProduct" style="background-color: #f8d7da; ">
+                            <!-- Product options will be loaded dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productQuantity">Quantity</label>
+                        <input type="number" class="form-control" id="productQuantity" placeholder="Enter quantity" required>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addProductToInvoice();">Add Product/Service to Invoice</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- List of Invoices -->
+        <div class="mt-5">
+            <h3 style="display: none;" id="listText">List of Invoices</h3>
+            <form id="invoicesContainer">
+            </form>
+            <button id="invoiceButton" type="button" class="btn btn-success" onclick="createInvoice();" style="display: none;">Create Invoice</button>
+            <button id="showButton" type="button" class="btn btn-success" onclick="showInvoice();" style="display: none;">Show Invoice</button>
+            <button id="hideButton" type="button" class="btn btn-success" onclick="hideInvoice();" style="display: none;">Hide Invoice</button>
+        </div>
+    </div>
+
+    <!-- JavaScript to handle form submissions -->
+    <script>
+        function addSeller() {
+            var sellerName = $('#sellerName').val();
+            var sellerTaxNumber = $('#sellerTaxNumber').val();
+            var sellerTitle = $('#sellerTitle').val();
+
+            if (!sellerName || !sellerTaxNumber || !sellerTitle) {
+                alert('Please fill out all fields in the Seller form.');
+                return;
+            }
+
+            var toSend = new FormData();
+            toSend.append("sellerName", sellerName);
+            toSend.append("sellerTaxNumber", sellerTaxNumber);
+            toSend.append("sellerTitle", sellerTitle);
+
+            $.post({
+                url: '/Seller/AddSeller',
+                data: toSend,
+                accept: "/",
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert('Seller added successfully');
+                    loadSellers();
+                    $("#sellerName").val("");
+                    $("#sellerTaxNumber").val("");
+                    $("#sellerTitle").val("");
+                    $("#sellerForm").hide();
+                    $("#sellerText").hide();
+                    $("#customerText").show();
+                    $("#customerForm").show();
+                }
+            });
+        }
+
+        function addCustomer() {
+            var customerName = $('#customerName').val();
+            var customerTaxNumber = $('#customerTaxNumber').val();
+            var customerTitle = $('#customerTitle').val();
+
+            if (!customerName || !customerTaxNumber || !customerTitle) {
+                alert('Please fill out all fields in the Customer form.');
+                return;
+            }
+
+            var toSend = new FormData();
+            toSend.append("customerName", customerName);
+            toSend.append("customerTaxNumber", customerTaxNumber);
+            toSend.append("customerTitle", customerTitle);
+
+            $.post({
+                url: '/Customer/AddCustomer',
+                data: toSend,
+                accept: "/",
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert('Customer added successfully');
+                    loadCustomers();
+                    $("#customerName").val("");
+                    $("#customerTaxNumber").val("");
+                    $("#customerTitle").val("");
+                    $("#customerForm").hide();
+                    $("#customerText").hide();
+                    $("#productText").show();
+                    $("#productForm").show();
+                }
+            });
+        }
+
+        function addProduct() {
+            var productName = $('#productName').val();
+            var nettPrice = $('#nettPrice').val();
+            var vatKey = $('#vatKey').val();
+
+            if (!productName || !nettPrice || !vatKey) {
+                alert('Please fill out all fields in the Product form.');
+                return;
+            }
+
+            if (vatKey < 0 || vatKey > 100) {
+                alert("Vat key must be between 0 and 100");
+            }
+
+            var toSend = new FormData();
+            toSend.append("productName", productName);
+            toSend.append("nettPrice", nettPrice);
+            toSend.append("vatKey", vatKey);
+
+            $.post({
+                url: '/Product/AddProduct',
+                data: toSend,
+                accept: "/",
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert('Product added successfully');
+                    loadProducts();
+                    $("#productName").val("");
+                    $("#nettPrice").val("");
+                    $("#vatKey").val("");
+                    $("#productForm").hide();
+                    $("#productText").hide();
+                    $("#invoiceText").show();
+                    $("#invoiceForm").show();
+                }
+            });
+        }
+
+        function addProductToInvoice() {
+            var invoiceSeller = $('#invoiceSeller').val();
+            var invoiceCustomer = $('#invoiceCustomer').val();
+            var productQuantity = $('#productQuantity').val();
+            var invoiceProduct = $('#invoiceProduct').val();
+            var productQuantity = $('#productQuantity').val();
+
+            if (!invoiceSeller || !invoiceCustomer || !invoiceProduct || !productQuantity) {
+                alert('Please fill out all fields in the Invoice form.');
+                return;
+            }
+
+            var toSend = new FormData();
+            toSend.append("invoiceProduct", invoiceProduct);
+            toSend.append("productQuantity", productQuantity);
+            $.post({
+                url: '/Invoice/AddProductToInvoice',
+                data: toSend,
+                accept: "/",
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert('Product added to invoice');
+                    loadProducts();
+                    $("#invoiceProduct").val("");
+                    $("#productQuantity").val("");
+                    $("#invoiceForm").hide();
+                    $("#invoiceText").hide();
+                    $("#listText").show();
+                    $("#invoiceButton").show();
+                }
+            });
+        }
+
+        function createInvoice() {
+            var invoiceSeller = $('#invoiceSeller').val();
+            var invoiceCustomer = $('#invoiceCustomer').val();
+            var invoiceDate = $('#invoiceDate').val();
+
+            var toSend = new FormData();
+            toSend.append("invoiceSeller", invoiceSeller);
+            toSend.append("invoiceCustomer", invoiceCustomer);
+            toSend.append("invoiceDate", invoiceDate);
+
+            $.post({
+                url: '/Invoice/CreateInvoice',
+                data: toSend,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert('Invoice created successfully');
+                    loadInvoices();
+                    $("#invoiceSeller").val("");
+                    $("#invoiceCustomer").val("");
+                    $("#invoiceDate").val("");
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                    alert('Failed to create invoice');
+                }
+            });
+        }
+
+        // Load sellers, customers, and products for the invoice form
+        function loadSellers() {
+            $.get({
+                url: '/Seller/GetSellers',
+                success: function (data) {
+                    var sellerSelect = $('#invoiceSeller');
+                    sellerSelect.empty();
+                    sellerSelect.append(new Option('Select seller', ''));
+                    data.forEach(function (seller) {
+                        sellerSelect.append(new Option(seller.sellerName, seller.sellerID));
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading sellers:', status, error);
+                }
+            });
+        }
+
+        function loadCustomers() {
+            $.get({
+                url: '/Customer/GetCustomers',
+                success: function (data) {
+                    var customerSelect = $('#invoiceCustomer');
+                    customerSelect.empty();
+                    customerSelect.append(new Option('Select customer', ''));
+                    data.forEach(function (customer) {
+                        customerSelect.append(new Option(customer.customerName, customer.customerID));
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading customers:', status, error);
+                }
+            });
+        }
+
+        function loadProducts() {
+            $.get({
+                url: '/Product/GetProducts',
+                success: function (data) {
+                    var productSelect = $('#invoiceProduct');
+                    productSelect.empty();
+                    productSelect.append(new Option('Select product', ''));
+                    data.forEach(function (product) {
+                        productSelect.append(new Option(product.productName, product.productID));
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading products:', status, error);
+                }
+            });
+        }
+
+        function loadInvoices() {
+            $.get({
+                url: '/Invoice/GetInvoices',
+                success: function () {
+                    var invoicesContainer = $('#invoicesContainer');
+                    invoicesContainer.empty();
+                    showInvoice();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading invoices:', status, error);
+                }
+            });
+        }
+
+        function showInvoice() {
+            $.get({
+                url: '/Invoice/GetInvoices',
+                success: function (data) {
+                    var invoicesContainer = $('#invoicesContainer');
+                    invoicesContainer.empty();
+                    data.forEach(function (invoice) {
+                        invoicesContainer.append(`<div class="invoice-item">
+                            <h5>Invoice #${invoice.checkID}</h5>
+                            <p>Seller: ${invoice.sellerName}, Customer: ${invoice.customerName}, Product: ${invoice.productName}</p>
+                            <p>Vat key: ${invoice.vatKey}%, Nett price: ${invoice.nettPrice}€, Gross price: ${invoice.grossPrice}€</p>
+                            <p>Date: ${invoice.checkDate}</p>
+                        </div>`);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading invoices:', status, error);
+                }
+            });
+        }
+
+        function hideInvoice() {
+            var invoicesContainer = $('#invoicesContainer');
+            invoicesContainer.empty();
+        }
+
+        $('#invoiceSeller, #invoiceCustomer, #invoiceProduct').on('change', function () {
+            $(this).css('background-color', 'white');
+        });
+
+        $("#showButton").on("click", function () {
+            $("#hideButton").show();
+            $("#showButton").hide();
+        });
+
+        $("#hideButton").on("click", function () {
+            $("#showButton").show();
+            $("#hideButton").hide();
+        });
+
+        // Initial load of sellers, customers, products, and invoices
+        $(document).ready(function () {
+            loadSellers();
+            loadCustomers();
+            loadProducts();
+            loadInvoices();
+        });
+        
+
+        $("#invoiceButton").on("click", function () {
+            $("#invoiceText").hide();
+            $("#invoiceButton").hide();
+            $("#showButton").hide();
+            $("#invoicesContainer").show();
+            $("#sellerForm").show();
+            $("#sellerText").show();
+            $("#sellerForm").show();
+            $("#hideButton").show();
+            $("#invoiceSeller").css("background-color", "#f8d7da");
+            $("#invoiceCustomer").css("background-color", "#f8d7da");
+            $("#invoiceProduct").css("background-color", "#f8d7da");
+        });
+    </script>
+</body>
+</html>

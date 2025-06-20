@@ -1,0 +1,4 @@
+Seller --------< Check >-------- Customer
+              |               |
+              v               v
+           Product         CheckItems
