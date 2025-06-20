@@ -1,0 +1,41 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\Mark\\Documents\\adatbazis_alkalmazasok_keszitese\\Check\\CheckApplication\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\CheckApplication.bundle.scp.css",
+      "PackagePath": "staticwebassets\\CheckApplication.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\Users\\Mark\\Documents\\adatbazis_alkalmazasok_keszitese\\Check\\CheckApplication\\wwwroot\\EK_diagram.txt",
+      "PackagePath": "staticwebassets\\EK_diagram.txt"
+    },
+    {
+      "Id": "C:\\Users\\Mark\\Documents\\adatbazis_alkalmazasok_keszitese\\Check\\CheckApplication\\wwwroot\\check.sql",
+      "PackagePath": "staticwebassets\\check.sql"
+    },
+    {
+      "Id": "C:\\Users\\Mark\\Documents\\adatbazis_alkalmazasok_keszitese\\Check\\CheckApplication\\wwwroot\\homepage.css",
+      "PackagePath": "staticwebassets\\homepage.css"
+    },
+    {
+      "Id": "C:\\Users\\Mark\\Documents\\adatbazis_alkalmazasok_keszitese\\Check\\CheckApplication\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.CheckApplication.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.build.CheckApplication.props",
+      "PackagePath": "build\\CheckApplication.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.buildMultiTargeting.CheckApplication.props",
+      "PackagePath": "buildMultiTargeting\\CheckApplication.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.buildTransitive.CheckApplication.props",
+      "PackagePath": "buildTransitive\\CheckApplication.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
